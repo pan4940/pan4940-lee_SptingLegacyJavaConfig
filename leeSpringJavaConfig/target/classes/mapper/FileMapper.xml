@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="file.mapper.FileMapper">
+	 
+    <insert id="boardFileInsert" parameterType="FileDTO">
+		INSERT into BoardFile (boardfile_id, uuid, uploadPath, fileName, LINKED_NUM) 
+		VALUES (seq_boardfile_id.nextval, #{uuid}, #{uploadPath}, #{fileName}, #{linked_num})
+	</insert>
+	
+	<insert id="productFileInsert" parameterType="FileDTO">
+		INSERT into ProductFile (id, uuid, uploadPath, fileName, linked_num) 
+		VALUES (seq_productfile_id.nextval, #{uuid}, #{uploadPath}, #{fileName}, #{linked_num})
+	</insert>
+
+
+	<insert id="brandFileInsert" parameterType="FileDTO">
+		INSERT into BrandFile (id, uuid, uploadPath, fileName, linked_num) 
+		VALUES (seq_brandfile_id.nextval, #{uuid}, #{uploadPath}, #{fileName}, #{linked_num})
+	</insert>
+
+	<delete id="boardFiledelete">
+		delete from BoardFile where uuid = #{uuid}
+	</delete>	
+
+	<delete id="boardFileDeleteAll" parameterType="int">
+		delete BOARDFILE where LINKED_NUM = #{board_num}
+	</delete>
+
+	<select id="findByBoardNum" parameterType="int" resultType="FileDTO">
+		select * from BoardFile where LINKED_NUM = #{linked_num} order by boardfile_id
+	</select>
+
+	<select id="findByProductNum" parameterType="int" resultType="FileDTO">
+		select * from PRODUCTFILE where LINKED_NUM = #{linked_num} order by id
+	</select>
+	
+	<select id="findByBrandNum" parameterType="int" resultType="FileDTO">
+		select * from BRANDFILE where LINKED_NUM = #{product_category_num} order by id
+	</select>
+	
+	<delete id="productFileDeleteAll">
+		delete ProductFile where LINKED_NUM = #{linked_num}
+	</delete>
+	
+	<delete id="brandFileDeleteAll">
+		delete BRANDFILE where LINKED_NUM = #{product_category_num}
+	</delete>
+</mapper>

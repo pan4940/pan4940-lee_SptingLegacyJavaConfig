@@ -1,0 +1,53 @@
+/* #detailDiv .wrap{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#detailDiv .target {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  margin: 0 auto;
+}
+#detailDiv .photo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  transition: transform .5s ease-out;
+} */
+
+
+#detailDiv div{
+	padding:5px;
+}
+#detailDiv img{
+	border:none;
+}
+.tab-content table tr{
+	border-bottom: 1px solid black;
+}
+
+.tab-content table{
+	width:80%
+}
+#reviewBoardDiv span{
+	float:right;
+}
+#reviewBoardDiv span a{
+	margin-left:20px;
+}
+#reviewTableDiv{
+	display:none;
+	
+}
+#reviewBoardDiv{
+	margin:20px auto;
+	
+}

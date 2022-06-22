@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="order.mapper.OrderMapper">
+
+	<select id="getCartList" parameterType="String" resultType="CartDTO">
+		select * from CART where member_id = #{member_id}
+	</select>
+	
+	
+	
+   	<insert id="addCart" parameterType="CartDTO">
+   		insert into CART(
+			member_id, 
+			detail_product_id 
+		) values (
+			#{member_id},
+			#{detail_product_id}
+		)
+   	</insert>
+   	
+   	<insert id="registerOrderDTO" parameterType="OrderDTO">
+   		insert into ORDERS(
+			ORDER_ID,
+			member_id, 
+			zipcode,
+			addr1,
+			addr2,
+			tel1,
+			tel2, 
+			tel3, 
+			phone1, 
+			phone2, 
+			phone3, 
+			status, 
+			totalPrice, 
+			deliveryCost
+		) values (
+			#{order_id},
+			#{member_id}, 
+			#{zipcode}, 
+			#{addr1}, 
+			#{addr2}, 
+			#{tel1}, 
+			#{tel2}, 
+			#{tel3}, 
+			#{phone1}, 
+			#{phone2}, 
+			#{phone3}, 
+			#{status}, 
+			#{totalPrice}, 
+			#{deliveryCost}
+		)
+   	</insert>
+   		
+   	<insert id="registerDetailOrderDTO" parameterType="DetailOrderDTO">
+   		insert into DETAIL_ORDER(
+   			DETAIL_ORDER_ID,
+			ORDER_ID,
+			DETAIL_PRODUCT_ID, 
+			PRODUCT_PRICE
+		) values (
+			SEQ_DETAIL_ORDER_ID.nextval,
+			#{order_id},
+			#{detail_product_id}, 
+			#{product_price} 
+		)
+   		
+   	</insert>
+   	
+   	<select id="getCartDtoByDetailProductId" parameterType="int" resultType="CartDTO">
+   		select * from CART where detail_product_id = #{detail_product_id}
+   	</select>
+   	
+   	<delete id="deleteCart" parameterType="String">
+   		delete CART where member_id = #{member_id}
+   	</delete>
+   	
+   	<select id="getOrderHistory" parameterType="String" resultType="OrderDTO">
+   		select * from ORDERS where member_id = #{member_id}
+   	</select>
+   	
+   	<select id="getDetailOrderDtoByOrderId" parameterType="String" resultType="DetailOrderDTO">
+   		select * from DETAIL_ORDER where order_id = #{order_id} order by detail_order_id
+   	</select>
+   	
+   	
+   	<delete id="deleteDetailProductFromCart" parameterType="int">
+   		delete CART where detail_product_id = #{detail_product_id}
+   	</delete>
+   	
+   	
+</mapper>

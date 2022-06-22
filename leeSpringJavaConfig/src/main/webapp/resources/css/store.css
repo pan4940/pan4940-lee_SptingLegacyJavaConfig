@@ -1,0 +1,48 @@
+#myImg2 {
+	width: 600px;
+	height: 400px;
+	margin: auto;
+	text-align: center;
+}
+
+#button {
+	text-align: center;
+}
+
+#storediv b {
+	border-bottom: 2px solid black;
+}
+
+#storediv p {
+	margin: 30px 30px;
+}
+
+#title {
+	margin-top: 50px;
+	text-align: center;
+}
+
+#a {
+	align-content: center;
+}
+
+#storediv {
+	display: flex;
+	justify-content: center;
+	width: 80%;
+	flex-direction: column;
+	margin: auto;
+}
+
+#ac {
+	margin-left: 18%;
+	width: 100%;
+}
+
+#abc {
+	width: 100%
+}
+
+#abc p {
+	display: inline-block;
+}

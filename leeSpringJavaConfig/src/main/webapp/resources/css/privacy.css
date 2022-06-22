@@ -1,0 +1,22 @@
+#privacyDiv {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	margin: auto;
+	width: 50%;
+}
+
+#title1 {
+	margin: 60px 0;
+	text-align: center;
+	font-family: 'Amiri', 'Times New Roman', 'TimesNow', Times New Roman,
+		sans-serif;
+}
+
+pre {
+	font-size: 12px;
+	font-weight: 600;
+	font-family: 'RTB', Helvetica Neue, Helvetica, Noto Sans KR, sans-serif;
+	margin-bottom: 200px;
+	white-space: pre-wrap;
+}

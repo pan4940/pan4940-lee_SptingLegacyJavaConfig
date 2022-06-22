@@ -1,0 +1,30 @@
+@import url("https://fonts.googleapis.com/css2?family=Sunflower:wght@300;500&display=swap");
+
+body{
+  font-family: "Sunflower", sans-serif;
+  height: 100vh;
+}
+
+#tempDiv {
+  margin: auto;
+  width: 680px;
+}
+
+#tempDiv p {
+  font-size: 11pt;
+}
+
+#tempDiv #information{
+font-size:11pt;
+}
+
+#tempDiv input[type="button"] {
+  background-color: white;
+  border: 0px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#tempDiv input[type="button"]:hover {
+  color: gray;
+}

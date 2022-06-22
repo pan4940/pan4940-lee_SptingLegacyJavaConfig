@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="product.mapper.ProductMapper">
+	 
+    <select id="getProductCategoryList" resultType="ProductCategoryDTO">
+		<![CDATA[
+		select 
+			level, PRODUCT_CATEGORY_NUM, PRODUCT_CATEGORY_NAME, PRODUCT_CATEGORY_NUM_REF 
+		from 
+			product_category
+		where 
+			product_category_num < 10000	
+    	start with PRODUCT_CATEGORY_NUM_REF is null connect by prior PRODUCT_CATEGORY_NUM = PRODUCT_CATEGORY_NUM_REF
+    	]]>
+    </select>
+    
+   	<select id="getProductsByProductName" parameterType="String" resultType="ProductDTO">
+		<![CDATA[
+		select * from product where upper(product_name) like upper('%' || #{product_name} || '%')
+		]]>
+	</select>
+	
+	<select id="getNavBrandProductCategoryDTO" resultType="ProductCategoryDTO">
+    	<![CDATA[
+    	select * from 
+    		(
+    		select * from product_category where product_category_num > 10000
+			) 
+		where rownum <= 8
+		]]>
+    </select>
+    
+    
+    <select id="getProductCategoryByProductCategoryREF" resultType="ProductCategoryDTO">
+    	<![CDATA[
+    	select * from product_category where product_category_num_ref = #{product_category_num} and product_category_num < 10000 order by product_category_num
+    	]]>
+    </select>
+    
+    
+    
+	<select id="getBrandsCategoryList" resultType="ProductCategoryDTO">
+		<![CDATA[
+		select 
+			level, PRODUCT_CATEGORY_NUM, PRODUCT_CATEGORY_NAME, PRODUCT_CATEGORY_NUM_REF, PRODUCT_CATEGORY_DESCRIP 
+		from 
+			product_category
+		where 
+			product_category_num > 10000	
+    	start with PRODUCT_CATEGORY_NUM_REF is null connect by prior PRODUCT_CATEGORY_NUM = PRODUCT_CATEGORY_NUM_REF
+    	]]>
+    </select>
+    
+    <select id="recommendBrand" resultType="ProductCategoryDTO">
+		<![CDATA[
+		select * from (SELECT * from product_category where product_category_num > 10000) WHERE ROWNUM <= 3		
+    	]]>	
+    </select>
+    
+    <select id="recommendShoesBrand" resultType="ProductDTO">
+		<![CDATA[
+		select * from (SELECT * from product where CATECODE2 = 1600 or CATECODE2 = 2600) WHERE ROWNUM <= 3	
+    	]]>	
+    </select>
+    
+    <insert id="createBrandCategorySelectKey" parameterType="ProductCategoryDTO">
+    	<selectKey keyProperty="product_category_num" order="BEFORE" resultType="int">
+			select SEQ_PRODUCT_CATEGORY_NUM.nextval from dual
+		</selectKey>
+    	
+    	insert into PRODUCT_CATEGORY (
+    		product_category_num, 
+    		product_category_name, 
+    		product_category_num_ref, 
+    		product_category_descrip
+    	) values (
+    		#{product_category_num},
+    		#{product_category_name},
+    		#{product_category_num_ref},
+    		#{product_category_descrip}
+    	)
+    </insert>
+	
+	
+	
+	<insert id="productRegister" parameterType="ProductDTO">
+		insert into PRODUCT (
+    		PRODUCT_num,
+    		PRODUCT_NAME,
+    		PRODUCT_PRICE,
+    		CATECODE1,
+    		CATECODE2,
+    		CATECODE3, 
+    		BRAND_NAME,
+    		BRANDCATEGORY,
+    		PRODUCT_DESCRIP
+    	) values (
+    		seq_PRODUCT_ID.nextval,
+    		#{product_name},
+    		#{product_price},
+    		#{cateCode1},
+    		#{cateCode2},
+    		#{cateCode3},
+    		#{brand_name},
+    		#{brandCategory},
+    		#{product_descrip}
+    	)
+	</insert>
+	
+	<insert id="productRegisterSelectKey" parameterType="ProductDTO">
+		<selectKey keyProperty="product_num" order="BEFORE" resultType="int">
+			select SEQ_PRODUCT_ID.nextval from dual
+		</selectKey>
+		insert into PRODUCT (
+    		PRODUCT_num,
+    		PRODUCT_NAME,
+    		PRODUCT_PRICE,
+    		BRAND_NAME,
+    		PRODUCT_DESCRIP,
+    		CATECODE1,
+    		CATECODE2,
+    		CATECODE3,
+    		BRANDCATEGORY
+    	) values (
+    		#{product_num},
+    		#{product_name},
+    		#{product_price},
+    		#{brand_name},
+    		#{product_descrip},
+    		#{cateCode1},
+    		#{cateCode2},
+    		#{cateCode3},
+    		#{brandCategory}
+    	)
+	</insert>
+	
+	<insert id="productRegisterCategory_link" parameterType="ProductDTO">
+		begin
+			insert into product_category_link(
+			    PRODUCT_NUM,
+			    PRODUCT_CATEGORY_NUM
+			) values (
+			    #{product_num},
+			    #{cateCode1}
+			);
+			
+			insert into product_category_link(
+			    PRODUCT_NUM,
+			    PRODUCT_CATEGORY_NUM
+			) values (
+			    #{product_num},
+			    #{cateCode2}
+			);
+			
+			<if test="cateCode3 != 0">
+				insert into product_category_link(
+				    PRODUCT_NUM,
+				    PRODUCT_CATEGORY_NUM
+				) values (
+				    #{product_num},
+				    #{cateCode3}
+				);
+			</if>
+			
+			
+			insert into product_category_link(
+			    PRODUCT_NUM,
+			    PRODUCT_CATEGORY_NUM
+			) values (
+			    #{product_num},
+			    #{brandCategory}
+			);
+		end;	
+	</insert>
+		
+	
+	<select id="getProductDTO" parameterType="int" resultType="ProductDTO">
+		select * from product where product_num = #{product_num}
+	</select>
+	
+	<!-- <select id="searchProductName" parameterType="String" resultType="ProductDTO">
+		<![CDATA[
+		select * from product where LOWER(product_name) like '%' || #{product_name} || '%'
+		]]>
+	</select> -->
+	
+	
+	<select id="findBrandNameByBrandCategory" parameterType="int" resultType="String">
+		select product_category_name from product_category where product_category_num = #{brandCategory}
+	</select>
+	
+	<select id="getProductByCategory" parameterType="java.util.Map" resultType="ProductDTO">
+		select * from product where cateCode1 = #{cateCode1} 
+		<if test="cateCode2 != 0">
+			and cateCode2 = #{cateCode2}
+		</if> 
+		<if test="cateCode3 != 0">
+			and cateCode3 = #{cateCode3}
+		</if>
+		<if test="brandCategory != 0">
+			and brandCategory = #{brandCategory}
+		</if>
+	</select>
+	
+	<select id="getProductCategoryDTO" parameterType="int" resultType="ProductCategoryDTO">
+		select * from product_category where product_category_num = #{product_category_num}
+	</select>
+	
+	<select id="getProductByProductNum" parameterType="String" resultType="ProductDTO">
+		select * from product where product_num = #{product_num}
+	</select>
+	
+	<select id="getProductListByProductCategory" parameterType="int" resultType="ProductDTO">
+		select p1.* from PRODUCT p1 left join PRODUCT_CATEGORY_LINK p2 on p1.product_num = p2.product_num where p2.product_category_num = #{product_category_num}
+	</select>
+	
+	
+	<select id="getTotalCount" parameterType="int" resultType="int">
+		select count(*) from PRODUCT p1 left join PRODUCT_CATEGORY_LINK p2 on p1.product_num = p2.product_num where p2.product_category_num = #{product_category_num}
+	</select>
+	
+	<select id="getProductsByBrandCategory" parameterType="int" resultType="ProductDTO">
+		select * from product where BRANDCATEGORY = #{brandCategory}
+	</select>
+	
+	<select id="getBrandnameByBrandcategory" parameterType="int" resultType="String">
+		select PRODUCT_CATEGORY_NAME from PRODUCT_CATEGORY where PRODUCT_CATEGORY_NUM = #{brandCategory}
+	</select>
+	
+	<insert id="registerTopProductSize" parameterType="ProductSizeDTO">
+		insert into Product_Size (
+			PRODUCT_SIZE_ID, 
+			PRODUCT_SIZE, 
+			PRODUCT_TOP_LENGTH, 
+			PRODUCT_SHOULDER, 
+			PRODUCT_CHEST, 
+			PRODUCT_SLEEVE, 
+			PRODUCT_NUM
+		) values (
+			seq_product_size_id.nextval,
+			#{product_size}, 
+			#{product_top_length}, 
+			#{product_shoulder}, 
+			#{product_chest}, 
+			#{product_sleeve}, 
+			#{product_num}
+		)
+	</insert>
+	
+	<update id="modifyTopProductSize" parameterType="ProductSizeDTO">
+		update Product_Size set
+    		PRODUCT_SIZE = #{product_size}, 
+    		PRODUCT_TOP_LENGTH = #{product_top_length},
+    		PRODUCT_SHOULDER = #{product_shoulder},
+    		PRODUCT_CHEST = #{product_chest},
+    		PRODUCT_SLEEVE = #{product_sleeve}
+    	where PRODUCT_SIZE_ID = #{product_size_id}
+	</update>
+	
+	<insert id="registerBottomProductSize" parameterType="ProductSizeDTO">
+		insert into Product_Size (
+			PRODUCT_SIZE_ID,
+			PRODUCT_SIZE, 
+			PRODUCT_WAIST_WIDTH, 
+			PRODUCT_THIGH_WIDTH, 
+			PRODUCT_BOTTOM_LENGTH, 
+			PRODUCT_ANKLE_CIRCUMFERENCE, 
+			PRODUCT_FRONT_RISE, 
+			PRODUCT_NUM
+		) values (
+			seq_product_size_id.nextval,
+			#{product_size},
+			#{product_waist_width}, 
+			#{product_thigh_width}, 
+			#{product_bottom_length}, 
+			#{product_ankle_circumference}, 
+			#{product_front_rise}, 
+			#{product_num}
+		)
+	</insert>
+	
+	<update id="modifyBottomProductSize" parameterType="ProductSizeDTO">
+		update Product_Size set
+    		PRODUCT_SIZE = #{product_size}, 
+    		PRODUCT_WAIST_WIDTH = #{product_waist_width},
+    		PRODUCT_THIGH_WIDTH = #{product_thigh_width},
+    		PRODUCT_BOTTOM_LENGTH = #{product_bottom_length},
+    		PRODUCT_ANKLE_CIRCUMFERENCE = #{product_ankle_circumference},
+    		PRODUCT_FRONT_RISE = #{product_front_rise}
+    	where PRODUCT_SIZE_ID = #{product_size_id}
+	</update>
+	
+	<insert id="registerCapProductSize" parameterType="ProductSizeDTO">
+		insert into Product_Size (
+			PRODUCT_SIZE_ID, 
+			PRODUCT_SIZE, 
+			PRODUCT_CAP_LENGTH, 
+			PRODUCT_CAP_CIRCUMFERENCE, 
+			PRODUCT_CAP_DEPTH, 
+			PRODUCT_NUM
+		) values (
+			seq_product_size_id.nextval,
+			#{product_size}, 
+			#{product_cap_length}, 
+			#{product_cap_circumference}, 
+			#{product_cap_depth}, 
+			#{product_num}
+		)
+	</insert>
+	
+	<update id="modifyCapProductSize" parameterType="ProductSizeDTO">
+		update Product_Size set
+    		PRODUCT_SIZE = #{product_size}, 
+    		PRODUCT_CAP_LENGTH = #{product_cap_length},
+    		PRODUCT_CAP_CIRCUMFERENCE = #{product_cap_circumference},
+    		PRODUCT_CAP_DEPTH = #{product_cap_depth}
+    	where PRODUCT_SIZE_ID = #{product_size_id}
+	</update>
+	
+	<insert id="registerOneSizeProductSize" parameterType="ProductSizeDTO">
+		insert into Product_Size (
+			PRODUCT_SIZE_ID, 
+			PRODUCT_SIZE, 
+			PRODUCT_NUM
+		) values (
+			seq_product_size_id.nextval,
+			#{product_size},
+			#{product_num}
+		)
+	</insert>
+	
+	<update id="modifyOneSizeProductSize" parameterType="ProductSizeDTO">
+		update Product_Size set
+    		PRODUCT_SIZE = #{product_size} 
+    	where PRODUCT_SIZE_ID = #{product_size_id}
+	</update>
+	
+	<select id="getProductByProductSize" parameterType="int" resultType="ProductSizeDTO">
+		select * from Product_Size where product_num = #{product_num}
+	</select>
+	
+	<select id="getProductSizeByProductSizeId" parameterType="int" resultType="ProductSizeDTO">
+		select * from Product_Size where product_size_id = #{product_size_id}
+	</select>
+	
+	<update id="modifyProduct" parameterType="ProductDTO">
+		update product set 
+		<if test="cateCode1 != 0">
+			cateCode1 = #{cateCode1},
+		</if>
+		<if test="cateCode2 != 0">
+			cateCode2 = #{cateCode2},
+		</if>
+		<if test="cateCode3 != 0">
+			cateCode3 = #{cateCode3},
+		</if>
+		<if test="brandCategory != 0">
+			brandCategory = #{brandCategory},
+		</if>
+			product_name = #{product_name}, 
+			product_price = #{product_price}, 
+			product_descrip = #{product_descrip}, 
+			updatedate = sysdate 
+		where product_num = #{product_num}
+	
+	</update>
+	
+	<update id="modifyBrandCategory" parameterType="ProductCategoryDTO">
+		update PRODUCT_CATEGORY set
+    		product_category_name = #{product_category_name}, 
+    		product_category_descrip = #{product_category_descrip}
+    	where product_category_num = #{product_category_num}
+	</update>
+	
+	
+	<delete id="productDeleteCategory_link" parameterType="int"> 
+		delete PRODUCT_CATEGORY_LINK where product_num = #{product_num}
+	</delete>
+	
+	<delete id="deleteBrandCategory" parameterType="int">
+		delete PRODUCT_CATEGORY where product_category_num = #{product_category_num}
+	</delete>
+	
+	<delete id="deleteProduct" parameterType="int">
+		delete product where product_num = #{product_num}
+	</delete>
+	
+	<delete id="deleteProductSize" parameterType="int">
+		delete PRODUCT_SIZE where product_size_id = #{product_size_id}
+	</delete>
+	
+	<select id="getDetailProductListByProductSizeId" parameterType="int" resultType="DetailProductDTO">
+		select * from detail_product where product_size_id = #{product_size_id} and status = 1 order by detail_product_id
+	</select>
+	
+	
+	
+	<select id="getDetailProductByDetailProductId" parameterType="int" resultType="DetailProductDTO">
+		select * from detail_product where detail_product_id = #{detail_product_id}
+	</select>
+	
+	
+	<insert id="addDetailProduct" parameterType="DetailProductDTO">
+		insert into DETAIL_PRODUCT (
+			DETAIL_PRODUCT_ID, 
+			PRODUCT_SIZE_ID, 
+			PRODUCT_NUM, 
+			STATUS
+		) values (
+			SEQ_DETAIL_PRODUCT_ID.nextval,
+			#{product_size_id},
+			#{product_num},
+			#{status}
+		)
+	</insert>
+	
+	<delete id="deleteDetailProductByDetailProductID" parameterType="int">
+		delete DETAIL_PRODUCT where DETAIL_PRODUCT_ID = #{detail_product_id}	
+	</delete>
+</mapper>

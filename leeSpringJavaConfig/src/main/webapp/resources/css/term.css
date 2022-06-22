@@ -1,0 +1,22 @@
+#termDiv {
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	margin: auto;
+	width: 50%;
+}
+
+#title3 {
+	margin: 150px 0 70px 0;
+	text-align: left;
+	font-family: 'Amiri', 'Times New Roman', 'TimesNow', Times New Roman,
+		sans-serif;
+}
+
+pre {
+	font-size: 12px;
+	font-weight: 600;
+	font-family: 'RTB', Helvetica Neue, Helvetica, Noto Sans KR, sans-serif;
+	margin-bottom: 200px;
+	white-space: pre-wrap;
+}

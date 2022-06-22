@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="member.mapper.MemberMapper">
+	
+	<resultMap type="member.bean.MemberDTO" id="memberMap">
+		<id property="member_id" column="member_id"/>
+		<result property="member_pwd" column="member_pwd"/>
+		<result property="member_name" column="member_name"/>
+		<result property="email" column="email"/>
+		<result property="email_check" column="email_check"/>
+		<result property="tel1" column="tel1"/>
+		<result property="tel2" column="tel2"/>
+		<result property="tel3" column="tel3"/>
+		<result property="phone1" column="phone1"/>
+		<result property="phone2" column="phone2"/>
+		<result property="phone3" column="phone3"/>
+		<result property="joinDate" column="joinDate"/>
+		<result property="updateDate" column="updateDate"/>
+		<result property="mileage" column="mileage"/>
+		<collection property="addressDTOList" resultMap="addressMap"/>
+		<collection property="memberAuthList" resultMap="memberAuthMap"/>
+	</resultMap>
+	
+	<resultMap type="member.bean.MemberAddressDTO" id="addressMap">
+		<id property="address_id" column="address_id"/>
+		<result property="member_id" column="member_id"/>
+		<result property="zipcode" column="zipcode"/>
+		<result property="addr1" column="addr1"/>
+		<result property="addr2" column="addr2"/>
+		<result property="orders" column="orders"/>
+	</resultMap>
+	
+	<resultMap type="member.bean.MemberAuthDTO" id="memberAuthMap">
+		<result property="member_id" column="member_id"/>
+		<result property="authority" column="auth"/>
+	</resultMap>
+	
+	
+	<!-- 관리자 모드에서 사용. id와 이름으로 memberDTO찾기 -->
+	<select id="getMemberByMemberIdAndMemberName" parameterType="java.util.Map" resultMap="memberMap">
+		select 
+    		m.*, ma.addr1, ma.addr2, ma.zipcode, A.auth 
+    	from 
+    		MEMBER m LEFT OUTER JOIN MEMBER_AUTH a 
+       			ON m.member_id = a.member_id  
+        			 LEFT OUTER JOIN MEMBER_ADDRESS ma
+         		ON m.member_id = ma.member_id
+        where 
+        	m.member_id = #{member_id} and m.member_name = #{member_name}
+	</select>
+	
+	
+	<!-- 로그인시 CustomUserDetailsService -->
+	<select id="getMemberDtoByMemberId" parameterType="String" resultMap="memberMap">
+		select 
+    		m.*, ma.address_id, ma.addr1, ma.addr2, ma.zipcode, ma.orders, a.auth 
+    	from 
+    		MEMBER m LEFT OUTER JOIN MEMBER_AUTH a 
+       			ON m.member_id = a.member_id  
+        			 LEFT OUTER JOIN MEMBER_ADDRESS ma
+         		ON m.member_id = ma.member_id
+        where 
+        	m.member_id = #{username}
+        order 
+        	by ma.orders		
+	</select>	
+	
+	
+	<update id="modifyOrdersOfAddress" parameterType="MemberAddressDTO">
+		update MEMBER_ADDRESS set orders = #{orders} where address_id = #{address_id}
+	</update>
+	
+	<delete id="deleteAddressDTO" parameterType="String">
+		delete from MEMBER_ADDRESS where address_id = #{address_id}
+	</delete>
+	
+	<select id="getAddressListByMemberID" parameterType="String" resultType="MemberAddressDTO">
+		select * from MEMBER_ADDRESS where member_id = #{member_id} order by orders
+	</select> 
+	
+	<select id="socialLogin" parameterType="MemberDTO" resultType="MemberDTO">
+		select * from member where member_id = #{member_id}
+	</select>	
+	
+	<select id="findMemberByID" parameterType="String" resultType="MemberDTO">
+		select * from member where member_id = #{member_id}
+	</select>
+	
+	<select id="findIdEmail" parameterType="java.util.Map" resultType="MemberDTO">
+		select * from member where member_name = #{member_name} and email = #{email}
+	</select>
+	
+	<select id="findIdPhone" parameterType="java.util.Map" resultType="MemberDTO">
+		select * from member where member_name = #{member_name} and phone1 = #{phone1} and phone2 = #{phone2} and phone3 = #{phone3}
+	</select>
+	
+	
+	<select id="findPwdByEmail" parameterType="java.util.Map" resultType="MemberDTO">
+		select * from member where member_name = #{member_name} and member_id = #{member_id} and email = #{email}
+	</select>
+	
+	<select id="findPwdByPhone" parameterType="java.util.Map" resultType="MemberDTO">
+		select * from member where member_name = #{member_name} and member_id = #{member_id} and phone1 = #{phone1} and phone2 = #{phone2} and phone3 = #{phone3}
+	</select>
+	
+	<insert id="join" parameterType="MemberDTO">
+		
+		insert into member(
+			member_id, member_pwd, member_name, email, email_check,
+			tel1, tel2, tel3, phone1, phone2, phone3
+		) values (
+			#{member_id}, #{member_pwd}, #{member_name}, #{email}, #{email_check},
+			#{tel1}, #{tel2}, #{tel3}, #{phone1}, #{phone2}, #{phone3}
+		)
+	</insert>
+	
+	<insert id="authRegister" parameterType="MemberAuthDTO">
+		insert into MEMBER_AUTH(MEMBER_ID, AUTH) values (#{member_id}, #{authority})
+	</insert>
+	
+	<insert id="insertAddress" parameterType="MemberAddressDTO">
+		insert into MEMBER_ADDRESS(
+			ADDRESS_ID,
+			MEMBER_ID, 
+			ZIPCODE, 
+			ADDR1, 
+			ADDR2, 
+			ORDERS
+		) values (
+			SEQ_ADDRESS_ID.nextval,
+			#{member_id}, 
+			#{zipcode},
+			#{addr1},
+			#{addr2},
+			(select count(*) from member_address where member_id = #{member_id}) + 1
+		)
+	</insert>
+	
+	<insert id="insertDefaultAddress" parameterType="MemberAddressDTO">
+		begin
+			update MEMBER_ADDRESS set 
+				orders = orders + 1
+			where member_id = #{member_id};
+			
+			insert into MEMBER_ADDRESS(
+				ADDRESS_ID,
+				MEMBER_ID, 
+				ZIPCODE, 
+				ADDR1, 
+				ADDR2, 
+				ORDERS
+			) values (
+				SEQ_ADDRESS_ID.nextval,
+				#{member_id}, 
+				#{zipcode},
+				#{addr1},
+				#{addr2},
+				1
+			);
+		end;	
+	</insert>
+		
+	<select id="getEditAddress" parameterType="String" resultType="MemberAddressDTO">
+		select * from MEMBER_ADDRESS where address_id = #{address_id}
+	</select>
+	
+	<update id="modifyOK" parameterType="MemberDTO">
+		update member set 
+			member_pwd = #{member_pwd}, 
+			member_name = #{member_name}, 
+			zipcode = #{zipcode},  
+			addr1 = #{addr1},
+			addr2 = #{addr2}
+		where member_id = #{member_id}	
+	</update>
+	
+	<update id="updatePwdAndRank" parameterType="MemberDTO">
+		update member set 
+			member_pwd = #{member_pwd}, 
+			rank_num = #{rank_num}
+		where member_id = #{member_id}		
+	</update>
+	
+	<select id="getMemberListByMemberIdAndMemberName" parameterType="java.util.Map" resultMap="memberMap">
+		<if test="member_id != '' and member_name != ''">
+			select 
+	    		m.*, ma.addr1, ma.addr2, ma.zipcode, A.auth 
+	    	from 
+	    		MEMBER m LEFT OUTER JOIN MEMBER_AUTH a 
+	       			ON m.member_id = a.member_id  
+	        			 LEFT OUTER JOIN MEMBER_ADDRESS ma
+	         		ON m.member_id = ma.member_id
+	        where 
+	        	m.member_id LIKE '%'||#{member_id}||'%' and m.member_name LIKE '%'||#{member_name}||'%'		
+		</if>
+		<if test="member_id == '' and member_name != ''">
+			select 
+	    		m.*, ma.addr1, ma.addr2, ma.zipcode, A.auth 
+	    	from 
+	    		MEMBER m LEFT OUTER JOIN MEMBER_AUTH a 
+	       			ON m.member_id = a.member_id  
+	        			 LEFT OUTER JOIN MEMBER_ADDRESS ma
+	         		ON m.member_id = ma.member_id
+	        where 
+				m.member_name LIKE '%'||#{member_name}||'%'
+		</if>
+		<if test="member_id != '' and member_name == ''">
+			select 
+	    		m.*, ma.addr1, ma.addr2, ma.zipcode, A.auth 
+	    	from 
+	    		MEMBER m LEFT OUTER JOIN MEMBER_AUTH a 
+	       			ON m.member_id = a.member_id  
+	        			 LEFT OUTER JOIN MEMBER_ADDRESS ma
+	         		ON m.member_id = ma.member_id
+	        where 
+	        	m.member_id LIKE '%'||#{member_id}||'%'	
+		</if>
+		<!-- member_id LIKE '%'||#{member_id}||'%' and member_name LIKE '%'||#{member_name}||'%' -->
+	</select>
+	
+	
+	<insert id="memberAuthUpdate" parameterType="java.util.Map">
+		<if test="authority == 'ROLE_MEMBER'">
+			begin
+				delete from MEMBER_AUTH where member_id = #{member_id};
+				
+				insert into MEMBER_AUTH (
+					member_id,
+					auth
+				) values (
+					#{member_id},
+					#{authority}
+				);
+			end;
+		</if>
+		
+		<if test="authority == 'ROLE_ADMIN'">
+			begin
+				delete from MEMBER_AUTH where member_id = #{member_id};
+				
+				insert into MEMBER_AUTH (
+					member_id,
+					auth
+				) values (
+					#{member_id},
+					#{authority}
+				);
+				
+				insert into MEMBER_AUTH (
+					member_id,
+					auth
+				) values (
+					#{member_id},
+					'ROLE_MEMBER'
+				);
+				
+			end;
+		</if>
+	</insert>
+	
+	<select id="memberGradeUpdate" parameterType="java.util.Map">
+		update member set
+			rank_num = #{rank_num}
+		where member_id = #{member_id}	
+	</select>
+	
+	<!-- 회원 탈퇴시 회원 정보 삭제 -->
+	<delete id="deleteMember" parameterType="String">
+		begin
+			delete from MEMBER_AUTH where member_id = #{member_id};
+			delete from MEMBER_ADDRESS where member_id = #{member_id};
+			delete from MEMBER where member_id = #{member_id};
+		end;	
+	</delete>
+	
+	<update id="defaultAddressModify" parameterType="MemberAddressDTO">
+		<![CDATA[
+		begin
+			update MEMBER_ADDRESS set 
+				orders = orders + 1
+			where member_id = #{member_id} and orders < #{orders};
+			
+			update MEMBER_ADDRESS set 
+				zipcode = #{zipcode}, 
+				addr1 = #{addr1}, 
+				addr2 = #{addr2},  
+				orders = 1
+			where address_id = #{address_id};
+		end;	
+		]]>
+	</update>
+	
+	<update id="addressModify" parameterType="MemberAddressDTO">
+		update MEMBER_ADDRESS set 
+			zipcode = #{zipcode}, 
+			addr1 = #{addr1}, 
+			addr2 = #{addr2} 
+		where address_id = #{address_id};
+	</update>
+</mapper>

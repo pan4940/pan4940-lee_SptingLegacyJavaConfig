@@ -1,0 +1,21 @@
+#aboutDiv {
+	display: flex;
+	justify-content: center;
+	flex-direction: row;
+	flex-wrap:wrap;
+	margin: 100px auto;
+}
+
+#title5 {
+	text-align: left;
+	padding:50px;
+}
+
+#title5 h5 {
+	font-weight: bold;
+	
+}
+
+#imgs {
+	width: 100%;
+}

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<typeAliases>
+		<typeAlias type="board.bean.BoardDTO" alias="BoardDTO"/>
+		<typeAlias type="board.bean.ReplyDTO" alias="ReplyDTO"/>
+		
+		<typeAlias type="file.bean.FileDTO" alias="FileDTO"/>
+		
+		<typeAlias type="member.bean.MemberDTO" alias="MemberDTO"/>
+		<typeAlias type="member.bean.MemberAddressDTO" alias="MemberAddressDTO"/>
+		<typeAlias type="member.bean.MemberAuthDTO" alias="MemberAuthDTO"/>
+		
+		<typeAlias type="product.bean.ProductDTO" alias="ProductDTO"/>
+		<typeAlias type="product.bean.ProductCategoryDTO" alias="ProductCategoryDTO"/>
+		<typeAlias type="product.bean.ProductSizeDTO" alias="ProductSizeDTO"/>
+		<typeAlias type="product.bean.DetailProductDTO" alias="DetailProductDTO"/>
+		
+		<typeAlias type="order.bean.CartDTO" alias="CartDTO"/>
+		<typeAlias type="order.bean.OrderDTO" alias="OrderDTO"/>
+		<typeAlias type="order.bean.DetailOrderDTO" alias="DetailOrderDTO"/>
+	</typeAliases>
+</configuration>
